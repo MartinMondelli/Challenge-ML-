@@ -1,24 +1,19 @@
 import pandas as pd
-from sklearn.ensemble import GradientBoostingRegressor
-from sklearn.model_selection import GridSearchCV # for cross-validation
 import numpy as np
-from functools import reduce
-import sklearn as sk
-#test 2
-# Para pullear : shift + command + p
+from sklearn.preprocessing import StandardScaler
 
-#test
-## Import data as a panda dataframe
-df_train_in = pd.read_csv("https://edouardpauwels.fr/MLM2DSSS/challenge_train_features.csv",index_col=0)
-y_train = pd.read_csv("https://edouardpauwels.fr/MLM2DSSS/challenge_train_revenue.csv",index_col=0)
-df_test = pd.read_csv("https://edouardpauwels.fr/MLM2DSSS/challenge_test_features.csv",index_col=0)
+#Scalling
+def scale_features(train, test, cols):
+    train_scaled = train.copy()
+    test_scaled = test.copy()
 
-## Display basic information about the data
-df_train_in.info()
-y_train.info()
-df_test.info()
+    for col in cols:
+        scaler = StandardScaler()
+        # Fit en train, transform en ambos
+        train_scaled[col + "_scaled"] = scaler.fit_transform(train[[col]])
+        test_scaled[col + "_scaled"] = scaler.transform(test[[col]])
 
-df_train_in.head()
+    return train_scaled, test_scaled
 
 def clean_dummies (df):
   x_dum = df.copy()
@@ -29,17 +24,17 @@ def clean_dummies (df):
   #Dummies
   # Sequels ======================================================================
   x_dum["sequels"] = df["collection"].apply(lambda c: 0 if pd.isna(c) else 1)
-  print(x_dum["sequels"].value_counts())
+  #print(x_dum["sequels"].value_counts())
   #1600 NO tienen secuelas contra 400 que SI
   # Seasons and gender correlation ===============================================
   x_dum["season_horror"] = x_dum["month"].apply(lambda m: 1 if m in [10, 11] else 0)
   x_dum["season_romance"] = x_dum["month"].apply(lambda m: 1 if m == 2 else 0)
   x_dum["season_family"] = x_dum["month"].apply(lambda m: 1 if m in [12, 1] else 0)
-  print(x_dum["season_horror"].value_counts())
+  #print(x_dum["season_horror"].value_counts())
   #1650 NO fueron lanzadas en Halloween 450 SI (NO hablamos aun de peliculas de terror en Halloween)
-  print(x_dum["season_romance"].value_counts())
+  #print(x_dum["season_romance"].value_counts())
   #1850 NO fueron lanzadas en San Valentin 150 SI (NO hablamos aun de peliculas de romance en San Valentin)
-  print(x_dum["season_family"].value_counts())
+  #print(x_dum["season_family"].value_counts())
   #1700 NO fueron lanzadas en Navidad 300 SI (NO hablamos aun de peliculas de familia en Navidad)
   # Top Actor ====================================================================
   main_actors = [
@@ -63,7 +58,7 @@ def clean_dummies (df):
   x_dum["star"] = df["cast"].apply(
     lambda cast: 1 if isinstance(cast, str) and any(actor in main_actors for actor in cast.split(",")) else 0
 )
-  print(x_dum["star"].value_counts())
+  #print(x_dum["star"].value_counts())
   #1550 NO tienen grandes actores 450 SI
   # Big company (only Top 10) =====================================================
   big_companies = ["Twentieth Century Fox Film Corporation", "Universal Pictures", "Warner Bros. Pictures",
@@ -72,14 +67,9 @@ def clean_dummies (df):
   x_dum["big_comp"] = df["company"].apply(
       lambda company: 1 if isinstance(company, str) and any(company in big_companies for company in company.split(",")) else 0
   )
-  print(x_dum["big_comp"].value_counts())
+  #print(x_dum["big_comp"].value_counts())
   #1550 NO son de grandes productoras 450 SI
   #Director lo podemos hacer con crew, util?? =====================================
-  #Rescaling
-  x_dum['log_budget'] = np.log(df['budget'].replace(0, np.nan))
-  x_dum['log_budget'] = x_dum['log_budget'].replace([-np.inf, np.inf], -1).fillna(-1)
-  x_dum['popularity_score'] = df['popularity_score'].fillna(np.min(-1)) #We tried with this "np.min(df['popularity_score'])"
-  x_dum['length'] = df['length'].fillna(-1) #We tried with this "np.mean(df['length'])"
   #Dummy for decades - CORREGIDO: usar operaciones vectorizadas y años completos
   # Crear variables dummy para cada década usando operaciones vectorizadas
   x_dum['decade_1920'] = ((x_dum['year'] >= 1920) & (x_dum['year'] < 1930)).astype(int)
@@ -95,46 +85,16 @@ def clean_dummies (df):
   x_dum['decade_2020'] = ((x_dum['year'] >= 2020) & (x_dum['year'] < 2030)).astype(int)
   # Dummy for marketing ============================================================
   x_dum["marketing_web"] = x_dum["webpage"].apply(lambda m: 0 if pd.isna(m) else 1)
-  #Dummy para NA ====================================================================
-  x_dum['NA'] = (pd.isna(df['length'])) & (pd.isna(df['popularity_score'])) & (pd.isna(df['budget']))
+  # Dummy for en ===================================================================
+  x_dum["english"] = x_dum["language"].apply(lambda m: 0 if m=="en" else 1)
+  # Dummy for country = ============================================================
+  x_dum["US"] = x_dum["country"].apply(lambda m: 0 if m=="US" else 1)
+
+  # Rescaling ======================================================================
+  x_dum['log_budget'] = np.log(df['budget'].replace(0, np.nan))
+  x_dum['log_budget'] = x_dum['log_budget'].replace([-np.inf, np.inf], -1).fillna(-1)
+  x_dum['popularity_score_scaled'] = df['popularity_score_scaled'].fillna(df['popularity_score_scaled'].mean())
+  x_dum['length_scaled'] = df['length'].fillna(df['length_scaled'].mean())
+  #Dummy para NA ===================================================================
+  x_dum['NA'] = (pd.isna(df['length_scaled'])) & (pd.isna(df['popularity_score_scaled'])) & (pd.isna(df['budget']))
   return x_dum
-
-
-
-df_train_in_2 = clean_dummies(df_train_in)
-df_test_processed = clean_dummies(df_test)
-
-df_train_run = df_train_in_2[["sequels", "star", "season_horror", "season_romance", "season_family",
-                            "big_comp", "log_budget", "popularity_score", "length", "NA"]]
-df_test_run = df_test_processed[["sequels", "star", "season_horror", "season_romance", "season_family",
-                            "big_comp", "log_budget", "popularity_score", "length", "NA"]]
-
-param_clfgb = {
-    'learning_rate': [0.05,0.1,0.2],
-    'n_estimators' : [100,200,300,400,500]
-}
-
-gbr = GradientBoostingRegressor()
-
-param_gbr = {
-    "n_estimators": [500],
-    "max_depth": [5],
-    "learning_rate": [0.01]
-}
-
-gbr_cv = GridSearchCV(
-    estimator=gbr,
-    param_grid=param_gbr,
-    cv=5,  # 5-fold cross-validation
-    scoring='neg_mean_squared_error',  # métrica de regresión
-    verbose=1
-)
-
-y_output = gbr_cv.fit(df_train_run, y_train.values.ravel()).predict(df_test_run)
-
-# Redondear a la decena más cercana
-strRes = [str(s) for s in np.round(y_output, -1)]
-
-predStr = reduce(lambda x, y: x + ', ' + y, strRes)
-
-print(predStr)
