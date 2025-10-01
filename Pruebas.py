@@ -1,18 +1,111 @@
+import matplotlib.pyplot as plt
+import seaborn as sns
 import pandas as pd
-import plotly_express as plt
 import numpy as np
-from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
-import sklearn as sk
 
 ## Import data as a panda dataframe
-df_train_in = pd.read_csv("https://edouardpauwels.fr/MLM2DSSS/challenge_train_features.csv",index_col=0)
-y_train = pd.read_csv("https://edouardpauwels.fr/MLM2DSSS/challenge_train_revenue.csv",index_col=0)
-df_test = pd.read_csv("https://edouardpauwels.fr/MLM2DSSS/challenge_test_features.csv",index_col=0)
+df_train_in = pd.read_csv("train_features_local.csv", index_col=0)
+y_train = pd.read_csv("y_train_local.csv", index_col=0)
+df_test = pd.read_csv("df_test_local.csv", index_col=0)
+# Features polinómicas y log
+df_train_in['length_2'] = df_train_in['length'] ** 2
+df_train_in['length_3'] = df_train_in['length'] ** 3
+df_train_in['length_ln'] = np.log(df_train_in['length'].replace(0, np.nan)).replace([-np.inf, np.inf], np.nan).fillna(-1)
+df_train_in['budget_2'] = df_train_in['budget'] ** 2
+df_train_in['budget_3'] = df_train_in['budget'] ** 3
+df_train_in['budget_ln'] = np.log(df_train_in['budget'].replace(0, np.nan)).replace([-np.inf, np.inf], np.nan).fillna(-1)
+df_train_in['popularity_score_2'] = df_train_in['popularity_score'] ** 2
+df_train_in['popularity_score_3'] = df_train_in['popularity_score'] ** 3
+df_train_in['popularity_score_ln'] = np.log(df_train_in['popularity_score'].replace(0, np.nan)).replace([-np.inf, np.inf], np.nan).fillna(-1)
 
-import matplotlib.pyplot as plt
 
-plt.hist(df_train_in['popularity_score'], bins=30)
+# Scatter simple
+#Budget - revenue
+plt.figure(figsize=(8,6))
+sns.scatterplot(x=df_train_in["budget"], y=y_train["revenue"])
+plt.xlabel("Budget")
+plt.ylabel("Revenue")
+plt.title("Scatter plot: Budget vs Revenue")
 plt.show()
+#Parece que hay correlacion positiva, confirmado por Spearman y Pearson
+#(hay que ver con log)
+
+#length - revenue
+plt.figure(figsize=(8,6))
+sns.scatterplot(x=np.log(df_train_in["length"]), y=y_train["revenue"])
+plt.xlabel("length")
+plt.ylabel("Revenue")
+plt.title("Scatter plot: length vs Revenue")
+plt.show()
+#Parece que no hay correlacion, muy baja ya sea con Pearson o Spearman
+
+#popularity_score - revenue
+plt.figure(figsize=(8,6))
+sns.scatterplot(x=df_train_in["popularity_score"], y=y_train["revenue"])
+plt.xlabel("popularity_score")
+plt.ylabel("Revenue")
+plt.title("Scatter plot: popularity_score vs Revenue")
+plt.show()
+#Hay correlacion pero poco fuerte, hay que ver con log
+
+# Scatter simple
+#Budget - revenue
+plt.figure(figsize=(8,6))
+sns.scatterplot(x=df_train_in["budget"], y=y_train["revenue"])
+plt.xlabel("Budget")
+plt.ylabel("Revenue")
+plt.title("Scatter plot: Budget vs Revenue")
+plt.show()
+#Parece que hay correlacion positiva, confirmado por Spearman y Pearson
+#(hay que ver con log)
+
+#length - revenue
+plt.figure(figsize=(8,6))
+sns.scatterplot(x=np.log(df_train_in["length"]), y=y_train["revenue"])
+plt.xlabel("length")
+plt.ylabel("Revenue")
+plt.title("Scatter plot: length vs Revenue")
+plt.show()
+#Parece que no hay correlacion, muy baja ya sea con Pearson o Spearman
+
+#popularity_score - revenue
+plt.figure(figsize=(8,6))
+sns.scatterplot(x=df_train_in["popularity_score"], y=y_train["revenue"])
+plt.xlabel("popularity_score")
+plt.ylabel("Revenue")
+plt.title("Scatter plot: popularity_score vs Revenue")
+plt.show()
+
+#Matriz dispersion
+features = ["budget", "popularity_score", "length", "revenue"]
+df_plot = df_train_in.copy()
+df_plot["revenue"] = y_train.values.ravel()
+
+sns.pairplot(df_plot[features], diag_kind="kde")
+plt.show()
+
+#Calcular Corr
+df_plot = df_plot[features]
+# Pearson
+pearson_corr = df_plot.corr(method="pearson")
+print("Pearson correlation:\n", pearson_corr)
+
+# Spearman
+spearman_corr = df_plot.corr(method="spearman")
+print("Spearman correlation:\n", spearman_corr)
+
+#Grafico corr
+plt.figure(figsize=(10,8))
+sns.heatmap(pearson_corr, annot=True, cmap="coolwarm", vmin=-1, vmax=1)
+plt.title("Pearson Correlation Heatmap")
+plt.show()
+
+plt.figure(figsize=(10,8))
+sns.heatmap(spearman_corr, annot=True, cmap="coolwarm", vmin=-1, vmax=1)
+plt.title("Spearman Correlation Heatmap")
+plt.show()
+
+
 # Imprimir toda la fila
 """"
 ## Display basic information about the data
