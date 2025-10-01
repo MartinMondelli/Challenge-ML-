@@ -93,9 +93,14 @@ def clean_dummies (df):
   x_dum['decade_2000'] = ((x_dum['year'] >= 2000) & (x_dum['year'] < 2010)).astype(int)
   x_dum['decade_2010'] = ((x_dum['year'] >= 2010) & (x_dum['year'] < 2020)).astype(int)
   x_dum['decade_2020'] = ((x_dum['year'] >= 2020) & (x_dum['year'] < 2030)).astype(int)
+
+
   #Dummy para NA ====================================================================
   x_dum['NA'] = (pd.isna(df['length'])) & (pd.isna(df['popularity_score'])) & (pd.isna(df['budget']))
   return x_dum
+
+
+
 df_train_in_2 = clean_dummies(df_train_in)
 df_test_processed = clean_dummies(df_test)
 
