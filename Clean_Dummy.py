@@ -1,10 +1,11 @@
 import pandas as pd
-from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.model_selection import GridSearchCV # for cross-validation
 import numpy as np
 from functools import reduce
 import sklearn as sk
 #test 2
+# Para pullear : shift + command + p
 
 #test
 ## Import data as a panda dataframe
@@ -74,35 +75,45 @@ def clean_dummies (df):
   print(x_dum["big_comp"].value_counts())
   #1550 NO son de grandes productoras 450 SI
   #Director lo podemos hacer con crew, util?? =======================================
+  x_dum['log_budget'] = np.log(df['budget'].replace(0, np.nan))
+  x_dum['log_budget'] = x_dum['log_budget'].replace([-np.inf, np.inf], -1).fillna(-1)
+  x_dum['popularity_score'] = df['popularity_score'].fillna(-1)
+  x_dum['length'] = df['length'].fillna(-1)
   return x_dum
 df_train_in_2 = clean_dummies(df_train_in)
 df_test_processed = clean_dummies(df_test)
 
 df_train_run = df_train_in_2[["sequels", "star", "season_horror", "season_romance", "season_family",
-                            "star", "big_comp"]]
+                            "star", "big_comp", "log_budget", "popularity_score", "length"]]
 df_test_run = df_test_processed[["sequels", "star", "season_horror", "season_romance", "season_family",
-                            "star", "big_comp"]]
+                            "star", "big_comp", "log_budget", "popularity_score", "length"]]
 
-param_clfrf = {
-    'n_estimators': [100, 200],
-    'max_depth':[8,10,20,25,34,40,45]     # Max deep of each tree
+param_clfgb = {
+    'learning_rate': [0.05,0.1,0.2],
+    'n_estimators' : [100,200,300,400,500]
 }
 
-clfrf = RandomForestRegressor()
-clfrf_cv = GridSearchCV(
-    estimator=clfrf,
-    param_grid=param_clfrf,
+gbr = GradientBoostingRegressor()
+
+param_gbr = {
+    "n_estimators": [100, 200, 300],
+    "max_depth": [3, 5, 7],
+    "learning_rate": [0.05, 0.1, 0.2]
+}
+
+gbr_cv = GridSearchCV(
+    estimator=gbr,
+    param_grid=param_gbr,
     cv=5,  # 5-fold cross-validation
-    scoring='neg_mean_squared_error',  # Optimizar por precisión
-    verbose=1  # Mostrar progreso
+    scoring='neg_mean_squared_error',  # métrica de regresión
+    verbose=1
 )
 
-y_output = clfrf_cv.fit(df_train_run, y_train.values.ravel()).predict(df_test_run)
+y_output = gbr_cv.fit(df_train_run, y_train.values.ravel()).predict(df_test_run)
 
 # Redondear a la decena más cercana
 strRes = [str(s) for s in np.round(y_output, -1)]
 
-# Transformar a string separado por comas
 predStr = reduce(lambda x, y: x + ', ' + y, strRes)
 
 print(predStr)
