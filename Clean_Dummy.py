@@ -69,3 +69,21 @@ def clean_dummies (df):
   #Director lo podemos hacer con crew, util?? =======================================
   return x_dum
 df_train_in_2 = clean_dummies(df_train_in)
+df_test_processed = clean_dummies(df_test)
+
+df_test_run = df_test_processed[["sequels", "star", "season_horror", "season_romance", "season_family",
+                            "star", "big_comp"]]
+
+param_clfrf = {
+    'max_depth':[8,10,20,25,34,40,45]     # Max deep of each tree
+}
+
+clfrf = RandomForestRegressor()
+clfrf_cv = GridSearchCV(
+    estimator=clfrf,
+    param_grid=param_clfrf,
+    cv=5,  # 5-fold cross-validation
+    scoring='accuracy',  # Optimizar por precisión
+    verbose=1  # Mostrar progreso
+)
+y_output = clfrf_cv.fit(df_train_run, y_train).predict(df_test_run)
