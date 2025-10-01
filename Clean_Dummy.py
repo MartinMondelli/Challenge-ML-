@@ -80,28 +80,19 @@ def clean_dummies (df):
   x_dum['log_budget'] = x_dum['log_budget'].replace([-np.inf, np.inf], -1).fillna(-1)
   x_dum['popularity_score'] = df['popularity_score'].fillna(np.min(-1)) #We tried with this "np.min(df['popularity_score'])"
   x_dum['length'] = df['length'].fillna(-1) #We tried with this "np.mean(df['length'])"
-  #Dummy for decades ================================================================
-  for i in range(1,10):
-      if x_dum['year'][i] >= 20 & x_dum['year'][i] <30:
-        x_dum['decade_1920'] = 1
-      if x_dum['year'][i] >= 30 & x_dum['year'][i] <40:
-        x_dum['decade_1930'] = 1
-      if x_dum['year'][i] >= 40 & x_dum['year'][i] <50:
-        x_dum['decade_1940'] = 1
-      if x_dum['year'][i] >= 50 & x_dum['year'][i] < 60:
-        x_dum['decade_1950'] = 1
-      if x_dum['year'][i] >= 60 & x_dum['year'][i] <70:
-        x_dum['decade_1960'] = 1
-      if x_dum['year'][i] >= 70 & x_dum['year'][i] < 80:
-        x_dum['decade_1970'] = 1
-      if x_dum['year'][i] >= 80 & x_dum['year'][i] < 90:
-        x_dum['decade_1980'] = 1
-      if x_dum['year'][i] >= 90 & x_dum['year'][i] < 00:
-        x_dum['decade_1990'] = 1
-      if x_dum['year'][i] >= 00 & x_dum['year'][i] <10:
-        x_dum['decade_2000'] = 1
-      if x_dum['year'][i] >= 10 & x_dum['year'][i] < 20:
-        x_dum['decade_2010'] = 1
+  #Dummy for decades - CORREGIDO: usar operaciones vectorizadas y años completos
+  # Crear variables dummy para cada década usando operaciones vectorizadas
+  x_dum['decade_1920'] = ((x_dum['year'] >= 1920) & (x_dum['year'] < 1930)).astype(int)
+  x_dum['decade_1930'] = ((x_dum['year'] >= 1930) & (x_dum['year'] < 1940)).astype(int)
+  x_dum['decade_1940'] = ((x_dum['year'] >= 1940) & (x_dum['year'] < 1950)).astype(int)
+  x_dum['decade_1950'] = ((x_dum['year'] >= 1950) & (x_dum['year'] < 1960)).astype(int)
+  x_dum['decade_1960'] = ((x_dum['year'] >= 1960) & (x_dum['year'] < 1970)).astype(int)
+  x_dum['decade_1970'] = ((x_dum['year'] >= 1970) & (x_dum['year'] < 1980)).astype(int)
+  x_dum['decade_1980'] = ((x_dum['year'] >= 1980) & (x_dum['year'] < 1990)).astype(int)
+  x_dum['decade_1990'] = ((x_dum['year'] >= 1990) & (x_dum['year'] < 2000)).astype(int)
+  x_dum['decade_2000'] = ((x_dum['year'] >= 2000) & (x_dum['year'] < 2010)).astype(int)
+  x_dum['decade_2010'] = ((x_dum['year'] >= 2010) & (x_dum['year'] < 2020)).astype(int)
+  x_dum['decade_2020'] = ((x_dum['year'] >= 2020) & (x_dum['year'] < 2030)).astype(int)
   #Dummy para NA ====================================================================
   x_dum['NA'] = (pd.isna(df['length'])) & (pd.isna(df['popularity_score'])) & (pd.isna(df['budget']))
   return x_dum
