@@ -22,16 +22,16 @@ df_train_in.head()
 
 def clean_dummies (df):
   x_dum = df.copy()
-  #Separating year and month =======================================================
+  #Separating year and month =====================================================
   date_split = df["date"].str.split("/", expand=True)
   x_dum["month"] = date_split[0].astype(int)
   x_dum["year"] = date_split[2].astype(int)
   #Dummies
-  # Sequels ========================================================================
+  # Sequels ======================================================================
   x_dum["sequels"] = df["collection"].apply(lambda c: 0 if pd.isna(c) else 1)
   print(x_dum["sequels"].value_counts())
   #1600 NO tienen secuelas contra 400 que SI
-  # Seasons and gender correlation =================================================
+  # Seasons and gender correlation ===============================================
   x_dum["season_horror"] = x_dum["month"].apply(lambda m: 1 if m in [10, 11] else 0)
   x_dum["season_romance"] = x_dum["month"].apply(lambda m: 1 if m == 2 else 0)
   x_dum["season_family"] = x_dum["month"].apply(lambda m: 1 if m in [12, 1] else 0)
@@ -41,7 +41,7 @@ def clean_dummies (df):
   #1850 NO fueron lanzadas en San Valentin 150 SI (NO hablamos aun de peliculas de romance en San Valentin)
   print(x_dum["season_family"].value_counts())
   #1700 NO fueron lanzadas en Navidad 300 SI (NO hablamos aun de peliculas de familia en Navidad)
-  # Top Actor ======================================================================
+  # Top Actor ====================================================================
   main_actors = [
     "Marlon Brando", "Humphrey Bogart", "James Stewart", "Gary Cooper", "Bette Davis",
     "Katharine Hepburn", "Audrey Hepburn", "Jack Nicholson", "Tom Hanks", "Meryl Streep",
@@ -65,7 +65,7 @@ def clean_dummies (df):
 )
   print(x_dum["star"].value_counts())
   #1550 NO tienen grandes actores 450 SI
-  # Big company (only Top 10) =======================================================
+  # Big company (only Top 10) =====================================================
   big_companies = ["Twentieth Century Fox Film Corporation", "Universal Pictures", "Warner Bros. Pictures",
                    "Columbia Pictures Corporation", "Walt Disney Pictures", "Marvel Studios", "Paramount Pictures",
                    "Legendary Pictures", "New Line Cinema", "DreamWorks Animation"]
@@ -74,7 +74,7 @@ def clean_dummies (df):
   )
   print(x_dum["big_comp"].value_counts())
   #1550 NO son de grandes productoras 450 SI
-  #Director lo podemos hacer con crew, util?? =======================================
+  #Director lo podemos hacer con crew, util?? =====================================
   #Rescaling
   x_dum['log_budget'] = np.log(df['budget'].replace(0, np.nan))
   x_dum['log_budget'] = x_dum['log_budget'].replace([-np.inf, np.inf], -1).fillna(-1)
@@ -93,8 +93,8 @@ def clean_dummies (df):
   x_dum['decade_2000'] = ((x_dum['year'] >= 2000) & (x_dum['year'] < 2010)).astype(int)
   x_dum['decade_2010'] = ((x_dum['year'] >= 2010) & (x_dum['year'] < 2020)).astype(int)
   x_dum['decade_2020'] = ((x_dum['year'] >= 2020) & (x_dum['year'] < 2030)).astype(int)
-
-
+  # Dummy for marketing ============================================================
+  x_dum["marketing_web"] = x_dum["webpage"].apply(lambda m: 0 if pd.isna(m) else 1)
   #Dummy para NA ====================================================================
   x_dum['NA'] = (pd.isna(df['length'])) & (pd.isna(df['popularity_score'])) & (pd.isna(df['budget']))
   return x_dum
@@ -105,13 +105,9 @@ df_train_in_2 = clean_dummies(df_train_in)
 df_test_processed = clean_dummies(df_test)
 
 df_train_run = df_train_in_2[["sequels", "star", "season_horror", "season_romance", "season_family",
-                            "big_comp", "decade_1920", "decade_1930", "decade_1940", "decade_1950",
-                              "decade_1960", "decade_1970", "decade_1980", "decade_1990", "decade_2000",
-                              "decade_2010", "log_budget", "popularity_score", "length", "NA"]]
+                            "big_comp", "log_budget", "popularity_score", "length", "NA"]]
 df_test_run = df_test_processed[["sequels", "star", "season_horror", "season_romance", "season_family",
-                            "big_comp", "decade_1920", "decade_1930", "decade_1940", "decade_1950",
-                              "decade_1960", "decade_1970", "decade_1980", "decade_1990", "decade_2000",
-                              "decade_2010", "log_budget", "popularity_score", "length", "NA"]]
+                            "big_comp", "log_budget", "popularity_score", "length", "NA"]]
 
 param_clfgb = {
     'learning_rate': [0.05,0.1,0.2],
@@ -121,9 +117,9 @@ param_clfgb = {
 gbr = GradientBoostingRegressor()
 
 param_gbr = {
-    "n_estimators": [100, 200, 300],
-    "max_depth": [3, 5, 7],
-    "learning_rate": [0.05, 0.1, 0.2]
+    "n_estimators": [500],
+    "max_depth": [5],
+    "learning_rate": [0.01]
 }
 
 gbr_cv = GridSearchCV(
