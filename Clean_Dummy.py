@@ -78,7 +78,7 @@ def clean_dummies (df):
   #Rescaling
   x_dum['log_budget'] = np.log(df['budget'].replace(0, np.nan))
   x_dum['log_budget'] = x_dum['log_budget'].replace([-np.inf, np.inf], -1).fillna(-1)
-  x_dum['popularity_score'] = df['popularity_score'].fillna(np.min(-1) #We tried with this "np.min(df['popularity_score'])"
+  x_dum['popularity_score'] = df['popularity_score'].fillna(np.min(-1)) #We tried with this "np.min(df['popularity_score'])"
   x_dum['length'] = df['length'].fillna(-1) #We tried with this "np.mean(df['length'])"
   #Dummy for decades ================================================================
   for i in range(1,10):
@@ -103,7 +103,7 @@ def clean_dummies (df):
       if x_dum['year'][i] >= 10 & x_dum['year'][i] < 20:
         x_dum['decade_2010'] = 1
   #Dummy para NA ====================================================================
-  x_dum['NA'] = df['length'] == np.nan & df['popularity_score'] == np.nan & df['budget'] == np.nan
+  x_dum['NA'] = (pd.isna(df['length'])) & (pd.isna(df['popularity_score'])) & (pd.isna(df['budget']))
   return x_dum
 df_train_in_2 = clean_dummies(df_train_in)
 df_test_processed = clean_dummies(df_test)
