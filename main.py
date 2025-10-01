@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 import sklearn as sk
 
@@ -7,6 +8,11 @@ df_train_in = pd.read_csv("https://edouardpauwels.fr/MLM2DSSS/challenge_train_fe
 y_train = pd.read_csv("https://edouardpauwels.fr/MLM2DSSS/challenge_train_revenue.csv",index_col=0)
 df_test = pd.read_csv("https://edouardpauwels.fr/MLM2DSSS/challenge_test_features.csv",index_col=0)
 
+idx = df_train_in['popularity_score'].idxmax()
+
+# Imprimir toda la fila
+print(df_train_in.loc[idx])
+""""
 ## Display basic information about the data
 df_train_in.info()
 y_train.info()
@@ -91,3 +97,4 @@ clfrf_cv = GridSearchCV(
     verbose=1  # Mostrar progreso
 )
 y_output = clfrf_cv.fit(df_train_run, y_train).predict(df_test_run)
+"""

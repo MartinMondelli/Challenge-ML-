@@ -80,16 +80,42 @@ def clean_dummies (df):
   x_dum['log_budget'] = x_dum['log_budget'].replace([-np.inf, np.inf], -1).fillna(-1)
   x_dum['popularity_score'] = df['popularity_score'].fillna(np.min(-1) #We tried with this "np.min(df['popularity_score'])"
   x_dum['length'] = df['length'].fillna(-1) #We tried with this "np.mean(df['length'])"
-  #Dummy para NA
+  #Dummy for decades ================================================================
+  for i in range(1,10):
+      if x_dum['year'][i] >= 20 & x_dum['year'][i] <30:
+        x_dum['decade_1920'] = 1
+      if x_dum['year'][i] >= 30 & x_dum['year'][i] <40:
+        x_dum['decade_1930'] = 1
+      if x_dum['year'][i] >= 40 & x_dum['year'][i] <50:
+        x_dum['decade_1940'] = 1
+      if x_dum['year'][i] >= 50 & x_dum['year'][i] < 60:
+        x_dum['decade_1950'] = 1
+      if x_dum['year'][i] >= 60 & x_dum['year'][i] <70:
+        x_dum['decade_1960'] = 1
+      if x_dum['year'][i] >= 70 & x_dum['year'][i] < 80:
+        x_dum['decade_1970'] = 1
+      if x_dum['year'][i] >= 80 & x_dum['year'][i] < 90:
+        x_dum['decade_1980'] = 1
+      if x_dum['year'][i] >= 90 & x_dum['year'][i] < 00:
+        x_dum['decade_1990'] = 1
+      if x_dum['year'][i] >= 00 & x_dum['year'][i] <10:
+        x_dum['decade_2000'] = 1
+      if x_dum['year'][i] >= 10 & x_dum['year'][i] < 20:
+        x_dum['decade_2010'] = 1
+  #Dummy para NA ====================================================================
   x_dum['NA'] = df['length'] == np.nan & df['popularity_score'] == np.nan & df['budget'] == np.nan
   return x_dum
 df_train_in_2 = clean_dummies(df_train_in)
 df_test_processed = clean_dummies(df_test)
 
 df_train_run = df_train_in_2[["sequels", "star", "season_horror", "season_romance", "season_family",
-                            "big_comp", "log_budget", "popularity_score", "length", "NA"]]
+                            "big_comp", "decade_1920", "decade_1930", "decade_1940", "decade_1950",
+                              "decade_1960", "decade_1970", "decade_1980", "decade_1990", "decade_2000",
+                              "decade_2010", "log_budget", "popularity_score", "length", "NA"]]
 df_test_run = df_test_processed[["sequels", "star", "season_horror", "season_romance", "season_family",
-                             "big_comp", "log_budget", "popularity_score", "length", "NA"]]
+                            "big_comp", "decade_1920", "decade_1930", "decade_1940", "decade_1950",
+                              "decade_1960", "decade_1970", "decade_1980", "decade_1990", "decade_2000",
+                              "decade_2010", "log_budget", "popularity_score", "length", "NA"]]
 
 param_clfgb = {
     'learning_rate': [0.05,0.1,0.2],
