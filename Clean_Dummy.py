@@ -75,18 +75,21 @@ def clean_dummies (df):
   print(x_dum["big_comp"].value_counts())
   #1550 NO son de grandes productoras 450 SI
   #Director lo podemos hacer con crew, util?? =======================================
+  #Rescaling
   x_dum['log_budget'] = np.log(df['budget'].replace(0, np.nan))
   x_dum['log_budget'] = x_dum['log_budget'].replace([-np.inf, np.inf], -1).fillna(-1)
-  x_dum['popularity_score'] = df['popularity_score'].fillna(-1)
-  x_dum['length'] = df['length'].fillna(-1)
+  x_dum['popularity_score'] = df['popularity_score'].fillna(np.min(-1) #We tried with this "np.min(df['popularity_score'])"
+  x_dum['length'] = df['length'].fillna(-1) #We tried with this "np.mean(df['length'])"
+  #Dummy para NA
+  x_dum['NA'] = df['length'] == np.nan & df['popularity_score'] == np.nan & df['budget'] == np.nan
   return x_dum
 df_train_in_2 = clean_dummies(df_train_in)
 df_test_processed = clean_dummies(df_test)
 
 df_train_run = df_train_in_2[["sequels", "star", "season_horror", "season_romance", "season_family",
-                            "star", "big_comp", "log_budget", "popularity_score", "length"]]
+                            "big_comp", "log_budget", "popularity_score", "length", "NA"]]
 df_test_run = df_test_processed[["sequels", "star", "season_horror", "season_romance", "season_family",
-                            "star", "big_comp", "log_budget", "popularity_score", "length"]]
+                             "big_comp", "log_budget", "popularity_score", "length", "NA"]]
 
 param_clfgb = {
     'learning_rate': [0.05,0.1,0.2],
