@@ -262,7 +262,7 @@ upper_bound = Q3 + 1.5 * IQR
 outliers_length = df_train_in[(df_train_in['length'] < lower_bound) | (df_train_in['length'] > upper_bound)]
 print("Outliers length: ",outliers_length)
 #Hay 83 (4.2% de los 2000 <5% entonces OK)$
-
+#epa
 #Popularity score
 Q1 = df_train_in['popularity_score'].quantile(0.25)
 Q3 = df_train_in['popularity_score'].quantile(0.75)

@@ -252,7 +252,7 @@ def clean_dummies (df):
   x_dum["season_horror"] = x_dum["month"].apply(lambda m: 1 if m in [10, 11] else 0)
   x_dum["season_romance"] = x_dum["month"].apply(lambda m: 1 if m == 2 else 0)
   x_dum["season_family"] = x_dum["month"].apply(lambda m: 1 if m in [12, 1] else 0)
-  #print(x_dum["season_horror"].value_counts())
+  #print(x_dum["seasoon_horror"].value_counts())
   #1650 NO fueron lanzadas en Halloween 450 SI (NO hablamos aun de peliculas de terror en Halloween)
   #print(x_dum["season_romance"].value_counts())
   #1850 NO fueron lanzadas en San Valentin 150 SI (NO hablamos aun de peliculas de romance en San Valentin)
