@@ -1,4 +1,4 @@
-from Clean_Dummy import clean_dummies, scale_features, winsorize_features
+from Clean_Dummy import clean_dummies, scale_features, winsorize_features, replace_na
 import pandas as pd
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.model_selection import GridSearchCV # for cross-validation
@@ -16,6 +16,14 @@ from functools import reduce
 df_train_in = pd.read_csv("https://edouardpauwels.fr/MLM2DSSS/challenge_train_features.csv",index_col=0)
 y_train = pd.read_csv("https://edouardpauwels.fr/MLM2DSSS/challenge_train_revenue.csv",index_col=0)
 df_test = pd.read_csv("https://edouardpauwels.fr/MLM2DSSS/challenge_test_features.csv",index_col=0)
+
+#Replace NAs
+df_train_in["length"] = replace_na(df_train_in, "length")
+df_test["length"] = replace_na(df_test, "length")
+df_train_in["popularity_score"] = replace_na(df_train_in, "popularity_score")
+df_test["popularity_score"] = replace_na(df_test, "popularity_score")
+df_train_in["budget"] = replace_na(df_train_in, "budget")
+df_test["budget"] = replace_na(df_test, "budget")
 
 #Winsorize
 df_train_in = winsorize_features(df_train_in)

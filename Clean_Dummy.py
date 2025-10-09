@@ -3,6 +3,11 @@ import numpy as np
 from sklearn.preprocessing import StandardScaler
 from scipy.stats.mstats import winsorize
 
+def replace_na(df, col):
+    df[col] = df[col].fillna(df[col].median())
+    df[col] = df[col].clip(lower=0)
+    return df[col]
+
 def winsorize_features(df):
     df['budget'] = np.array(winsorize(df['budget'], limits=[0.05, 0.05]))
     df['length_wind'] = np.array(winsorize(df['length'], limits=[0.02, 0.02]))
@@ -99,13 +104,10 @@ def clean_dummies (df):
   x_dum["US"] = x_dum["country"].apply(lambda m: 0 if m=="US" else 1)
 
   # Rescaling ======================================================================
-  x_dum['log_popularity_score_scaled'] = np.log1p(df['popularity_score_scaled'].replace(0, np.nan))
-  x_dum['log_popularity_score_scaled'] = x_dum['log_popularity_score_scaled'].replace([-np.inf, np.inf], -1).fillna(-1)
-  x_dum['length_scaled'] = df['length_scaled'].fillna(df['length_scaled'].mean())
+  x_dum['log_popularity_score_scaled'] = np.log1p(df['popularity_score_scaled'])
+  x_dum['log_popularity_score_scaled'] = x_dum['log_popularity_score_scaled'].replace(-np.inf, min(x_dum['log_popularity_score_scaled']))
   x_dum['length_2'] = x_dum['length_scaled'] ** 2
   x_dum['length_3'] = x_dum['length_scaled'] ** 3
-  x_dum['budget_scaled'] = df['budget_scaled'].fillna(df['length_scaled'].mean())
-  x_dum['popularity_score_scaled'] = df['popularity_score_scaled'].fillna(df['length_scaled'].mean())
   #Dummy para NA ===================================================================
   x_dum['NA'] = (pd.isna(df['length'])) & (pd.isna(df['popularity_score'])) & (pd.isna(df['budget']))
   return x_dum
